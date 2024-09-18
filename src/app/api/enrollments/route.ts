@@ -172,7 +172,7 @@ export const DELETE = async (request:NextRequest) => {
     );
   }
   //perform deletion by using splice or array filter
-
+  DB.enrollments.splice(DB.enrollments.indexOf(foundEnroll), 1);
   //if code reach here it means deletion is complete
   return NextResponse.json({
     ok: true,

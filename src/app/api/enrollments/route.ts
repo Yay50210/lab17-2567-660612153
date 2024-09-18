@@ -25,17 +25,24 @@ export const GET = async (request:NextRequest) => {
     );
   }
 
+  
+    
   //check if user provide one of 'studentId' or 'courseNo'
   //User must not provide both values, and must not provide nothing
 
-  // return NextResponse.json(
-  //   {
-  //     ok: false,
-  //     message: "Please provide either studentId or courseNo and not both!",
-  //   },
-  //   { status: 400 }
-  // );
 
+ 
+    if(studentId && courseNo || !studentId && !courseNo){
+
+  
+  return NextResponse.json(
+    {
+      ok: false,
+      message: "Please provide either studentId or courseNo and not both!",
+    },
+      { status: 400 }
+    );
+  }
   //get all courses enrolled by a student
   if (studentId) {
     const courseNoList = [];
@@ -60,10 +67,20 @@ export const GET = async (request:NextRequest) => {
     const studentIdList = [];
     for (const enroll of DB.enrollments) {
       //your code here
+      if (enroll.courseNo === courseNo) {
+        studentIdList.push(enroll.studentId);
+      }
     }
 
     const students:Student[] = [];
     //your code here
+    for (const studentId of studentIdList) {
+      const student = DB.students.find((x) => x.studentId === studentId);
+      if(!student) return NextResponse.json({
+        ok: false,
+        message: 'Oops, something went wrong',
+      },{ status: 500 })
+    }
 
     return NextResponse.json({
       ok: true,
@@ -141,15 +158,19 @@ export const DELETE = async (request:NextRequest) => {
   const { studentId, courseNo } = body;
 
   //check if studentId and courseNo exist on enrollment
+  const foundEnroll = DB.enrollments.find(
+    (x) => x.studentId === studentId && x.courseNo === courseNo
+  );
 
-  // return NextResponse.json(
-  //   {
-  //     ok: false,
-  //     message: "Enrollment does not exist",
-  //   },
-  //   { status: 404 }
-  // );
-
+  if (!foundEnroll) {
+    return NextResponse.json(
+      {
+        ok: false,
+        message: "Enrollment does not exist",
+      },
+      { status: 404 }
+    );
+  }
   //perform deletion by using splice or array filter
 
   //if code reach here it means deletion is complete
